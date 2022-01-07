@@ -1,0 +1,31 @@
+2022-01-07 12:26:05,844 [   2042]   WARN - Container.ComponentManagerImpl - Do not use constructor injection (requestorClass=com.android.tools.idea.AndroidInitialConfigurator) 
+2022-01-07 12:26:07,587 [   3785]   WARN - tartup.impl.StartupManagerImpl - Activities registered via registerPostStartupActivity must be dumb-aware: com.android.tools.idea.stats.AndroidStudioUsageTracker$ProjectLifecycleTracker$projectComponentsInitialized$1@aa5d15 
+2022-01-07 12:26:12,359 [   8557]   WARN -            #com.android.ddmlib - * daemon not running; starting now at tcp:5037 
+2022-01-07 12:26:12,744 [   8942]   WARN -            #com.android.ddmlib - * daemon started successfully 
+2022-01-07 12:26:13,913 [  10111]   WARN - Container.ComponentManagerImpl - Do not use constructor injection (requestorClass=com.android.tools.idea.apk.ApkWritingAccessProvider) 
+2022-01-07 12:27:25,122 [  81320]   WARN - tartup.impl.StartupManagerImpl - Activities registered via registerPostStartupActivity must be dumb-aware: com.android.tools.idea.stats.AndroidStudioUsageTracker$ProjectLifecycleTracker$projectComponentsInitialized$1@49627fec 
+2022-01-07 12:27:26,658 [  82856]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/build.gradle 
+2022-01-07 12:27:26,706 [  82904]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/settings.gradle 
+2022-01-07 12:27:26,729 [  82927]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/gradle.properties 
+2022-01-07 12:27:27,266 [  83464]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/app/build.gradle 
+2022-01-07 12:27:27,288 [  83486]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/settings.gradle 
+2022-01-07 12:27:27,351 [  83549]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/app/build.gradle 
+2022-01-07 12:27:27,611 [  83809]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/app/src/androidTest/java/com/example/myapplication/ExampleInstrumentedTest.java 
+2022-01-07 12:27:27,647 [  83845]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/app/src/test/java/com/example/myapplication/ExampleUnitTest.java 
+2022-01-07 12:27:28,325 [  84523]   WARN - Container.ComponentManagerImpl - Do not use constructor injection (requestorClass=com.android.tools.idea.apk.ApkWritingAccessProvider) 
+2022-01-07 12:27:28,488 [  84686]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/app/build.gradle 
+2022-01-07 12:27:28,549 [  84747]   WARN - BasedStripTrailingSpacesFilter - No current project is given, trailing spaces will be stripped later (postponed). File: /home/hineven/prj/netlab3/app/app/src/main/java/com/example/myapplication/MainActivity.java 
+2022-01-07 12:27:56,946 [ 113144]   WARN -       GradleBuildOutputUtil.kt - Failed to read Json output file from /home/hineven/prj/netlab3/app/app/build/outputs/apk/debug/output-metadata.json. Build may have failed. 
+2022-01-07 12:44:11,004 [1087202]  ERROR - terminal.emulator.JediEmulator - Error processing OSC 1;..j/netlab3/app 
+2022-01-07 12:44:11,027 [1087225]  ERROR - terminal.emulator.JediEmulator - Unhandled Control sequence
+parsed                        :ESC[?2004h
+bytes read                    :ESC[ 
+2022-01-07 12:44:34,765 [1110963]   WARN - com.intellij.ide.IdeEventQueue - Too many mouse clicks (11)!!! 
+2022-01-07 12:44:34,766 [1110964]   WARN - com.intellij.ide.IdeEventQueue - Too many mouse clicks (11)!!! 
+2022-01-07 12:44:34,768 [1110966]   WARN - com.intellij.ide.IdeEventQueue - Too many mouse clicks (11)!!! 
+2022-01-07 12:44:34,769 [1110967]   WARN - com.intellij.ide.IdeEventQueue - Too many mouse clicks (11)!!! 
+2022-01-07 12:44:36,712 [1112910]   WARN - com.intellij.ide.IdeEventQueue - Too many mouse clicks (12)!!! 
+2022-01-07 12:44:36,716 [1112914]   WARN - com.intellij.ide.IdeEventQueue - Too many mouse clicks (12)!!! 
+2022-01-07 12:44:36,719 [1112917]   WARN - com.intellij.ide.IdeEventQueue - Too many mouse clicks (12)!!! 
+2022-01-07 12:44:42,606 [1118804]   WARN - .AbstractProgressIndicatorBase - This progress indicator is indeterminate, this may lead to visual inconsistency. Please call setIndeterminate(false) before you start progress.
+com.intellij.openapi.vcs.impl.CodeSmellDetectorImpl.findCodeSmells(CodeSmellDetectorImpl.java:137) 
