@@ -29,3 +29,8 @@ bytes read                    :ESC[
 2022-01-07 12:44:36,719 [1112917]   WARN - com.intellij.ide.IdeEventQueue - Too many mouse clicks (12)!!! 
 2022-01-07 12:44:42,606 [1118804]   WARN - .AbstractProgressIndicatorBase - This progress indicator is indeterminate, this may lead to visual inconsistency. Please call setIndeterminate(false) before you start progress.
 com.intellij.openapi.vcs.impl.CodeSmellDetectorImpl.findCodeSmells(CodeSmellDetectorImpl.java:137) 
+2022-01-07 12:49:00,205 [1376403]   WARN - o.DelegatingHttpRequestHandler - Invalid authorization header 'Basic Og==' 
+2022-01-07 12:49:10,523 [1386721]   WARN - o.DelegatingHttpRequestHandler - Invalid authorization header 'Basic aGluZXZlbjpodTIwMDFjaGUwNjI3' 
+2022-01-07 12:49:13,311 [1389509]   WARN - o.DelegatingHttpRequestHandler - Invalid authorization header 'Basic Og==' 
+2022-01-07 18:52:49,723 [23205921]   WARN - o.DelegatingHttpRequestHandler - Invalid authorization header 'Basic Og==' 
+2022-01-07 18:52:50,288 [23206486]   WARN - o.DelegatingHttpRequestHandler - Invalid authorization header 'Basic Og==' 
