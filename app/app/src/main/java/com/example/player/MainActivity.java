@@ -1,108 +1,103 @@
-package com.example.myapplication;
+package com.example.player;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Context;
-import android.media.MediaCodec;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
-import android.media.MediaFormat;
-import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.RouteInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Telephony;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
-import android.util.Range;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.VideoView;
 
+import com.example.player.net.AcquireTranscodedStream;
+import com.example.player.net.ConnectToMiddlebox;
+import com.example.player.net.NetRes;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.TracksInfo;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.decoder.DecoderReuseEvaluation;
 import com.google.android.exoplayer2.ext.rtmp.RtmpDataSource;
-import com.google.android.exoplayer2.ext.rtmp.RtmpDataSourceFactory;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
-import com.google.android.exoplayer2.source.MediaLoadData;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.MediaSourceFactory;
-import com.google.android.exoplayer2.source.TrackGroup;
-import com.google.android.exoplayer2.source.rtsp.RtspMediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.TransferListener;
-import com.google.android.exoplayer2.video.VideoFrameMetadataListener;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.security.Permission;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
+import javax.net.SocketFactory;
 
 public class MainActivity extends AppCompatActivity {
 
 
-    private ExoPlayer player;
+    // UI
     private StyledPlayerView playerView;
-    private TextView logs_text;
     private TextView uri_input;
     private String str_log = "";
     private TextView bitrate_text;
     private TextView playback_delay_text;
     private TextView encoding_text;
+    private Button net_button;
+    private Button play_button;
+    private String encoding_name;
+    private String decoder_name;
 
+    // Player
+    private ExoPlayer player;
     // injected bandwidthmeter
     private BandwidthMeter bandwidth;
+    // Event handler
+    private Handler handler;
+    // Network relating objects
+    private NetRes net;
+    // Application relating resources
+    private AppRes res;
 
     protected void logstr (String str) {
         str_log += str + '\n';
         str_log = str_log.substring(0, Math.min(str_log.length(), 2048));
-        logs_text.setText(str_log);
     }
-
-    private String encoding_name;
-    private String decoder_name;
-
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        //ActivityCompat.requestPermissions(this, perms, 200);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        logs_text = (TextView) ActivityCompat.requireViewById(this, R.id.logsText);
+    protected void alert (String str) {
+        new AlertDialog.Builder(this)
+                .setTitle("Alert")
+                .setMessage(str)
+                .setPositiveButton(android.R.string.yes, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+    protected void detectDeviceCodecInfo () {
         String ssout = "";
         MediaCodecList list= new MediaCodecList(MediaCodecList.REGULAR_CODECS);
         MediaCodecInfo [] infos = list.getCodecInfos();
+        ArrayList<String> codes = new ArrayList<String>();
         for (int i = 0; i<infos.length; i++) {
             MediaCodecInfo codecInfo = infos[i];
             if(codecInfo.isHardwareAccelerated()) {
@@ -112,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 String[] types = codecInfo.getSupportedTypes();
                 for (int j = 0; j < types.length; j++) {
                     ssout += types[j];
+                    codes.add(types[j]);
                     ssout += '\n';
                     MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(types[j]);
                     if(caps.getVideoCapabilities() != null) {
@@ -127,7 +123,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         logstr(ssout);
-
+        res.hardware_accel_codecs = codes.toArray(new String[0]);
+    }
+    protected void initializeUI () {
         uri_input = (TextView) ActivityCompat.requireViewById(this, R.id.streamUriText);
         bandwidth = new DefaultBandwidthMeter.Builder(getApplicationContext()).build();
         RtmpDataSource.Factory rtmpDataSourceFactory = new RtmpDataSource.Factory();
@@ -184,25 +182,95 @@ public class MainActivity extends AppCompatActivity {
         encoding.addView(encoding_text);
 
         status_list.addView(encoding);
+
+        net_button = ActivityCompat.requireViewById(this, R.id.net);
+        play_button = ActivityCompat.requireViewById(this, R.id.play_button);
+    }
+
+
+    protected void playStream (Uri uri) {
+        try {
+            if(player.isPlaying()) {
+                player.stop();
+            }
+            // Build the media item.
+            MediaItem mediaItem = MediaItem.fromUri(uri);
+            // Set the media item to be played.
+            player.setMediaItem(mediaItem);
+            // Prepare the player.
+            player.prepare();
+            // Start the playback.
+            player.play();
+        } catch (Exception e) {
+            alert(e.toString());
+        }
+    }
+
+    class AppEventHandler extends Handler {
+        public AppEventHandler(@NonNull Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            if(data.containsKey("log")) {
+                logstr(data.getString("log"));
+            }
+            if(data.containsKey("connected")) {
+                if(data.getBoolean("connected")) {
+                    net_button.setEnabled(false);
+                    net_button.setText("Connected");
+                    net.middlebox_ready = true;
+                } else {
+                    net.middlebox_ready = false;
+                    net_button.setEnabled(true);
+                    net_button.setText("Connect");
+                    alert("Failed to connect to the middle box.");
+                }
+            }
+            if(data.containsKey("transcoded")) {
+                String cmd = data.getString("transcoded");
+                if(cmd == "fail") alert("Failed to acquire a transcoded stream from the middle box.");
+                else {
+                    logstr("acquired: " + cmd);
+                    playStream(Uri.parse(cmd));
+                }
+                play_button.setEnabled(true);
+            }
+        }
+    };
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        //ActivityCompat.requestPermissions(this, perms, 200);
+        super.onCreate(savedInstanceState);
+        // Initialize net res container
+        net = new NetRes();
+        // Initialize app res container
+        res = new AppRes();
+        setContentView(R.layout.activity_main);
+        detectDeviceCodecInfo();
+        initializeUI();
+        uri_input.setText("rtmp://192.168.137.130/live/livestream");
+
         // UI done
         // Registering analytics listeners
         player.addAnalyticsListener(new AnalyticsListener() {
-
             @Override
             public void onVideoInputFormatChanged(EventTime eventTime, Format format, @Nullable DecoderReuseEvaluation decoderReuseEvaluation) {
                 encoding_name = format.codecs + "; " + format.width + "*" + format.height;
                 encoding_text.setText(encoding_name + " \n decoder: " + decoder_name);
             }
-
             @Override
             public void onVideoDecoderInitialized(EventTime eventTime, String decoderName, long initializedTimestampMs, long initializationDurationMs) {
                 decoder_name = decoderName;
                 encoding_text.setText(encoding_name + " \n decoder: " + decoder_name);
             }
-
         });
-
-        final Handler handler = new Handler();
+        final Handler vhandler = new Handler();
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -223,31 +291,39 @@ public class MainActivity extends AppCompatActivity {
                     playback_delay_text.setText(dltext);
                 }
                 //also call the same runnable to call it at regular interval
-                handler.postDelayed(this, 1000);
+                vhandler.postDelayed(this, 1000);
             }
         };
-        uri_input.setText("rtmp://192.168.137.130/live/livestream");
-//runnable must be execute once
-        handler.post(runnable);
+        //runnable must be execute once
+        vhandler.post(runnable);
+
+
+        handler = new AppEventHandler(getMainLooper());
+
     }
 
-    public void onSettingsButtonClicked (View view) {
-        String urit = uri_input.getEditableText().toString();
-        Uri uri = Uri.parse(urit);
-        try {
-            if(player.isPlaying()) {
-                player.stop();
-            }
-            // Build the media item.
-            MediaItem mediaItem = MediaItem.fromUri(uri);
-            // Set the media item to be played.
-            player.setMediaItem(mediaItem);
-            // Prepare the player.
-            player.prepare();
-            // Start the playback.
-            player.play();
-        } catch (Exception e) {
-            logstr(e.toString());
+    public void onPlayButtonClicked (View view) {
+        if(!net.middlebox_ready) {
+            alert("Middle box is not ready!");
+            return ;
         }
+        String urit = uri_input.getEditableText().toString();
+        res.request_video_uri = Uri.parse(urit);
+        play_button.setEnabled(false);
+        new Thread(new AcquireTranscodedStream(getApplicationContext(), handler, res, net)).start();
     }
+    
+    public void onNetworkButtonClicked (View view) {
+        net_button.setEnabled(false);
+        net_button.setText("Connecting");
+        new Thread(new ConnectToMiddlebox(getApplicationContext(), handler, res, net)).start();
+    }
+
+    public void onLogsButtonClicked (View view) {
+        Intent intent = new Intent(this, LogsActivity.class);
+        intent.putExtra("logs", str_log);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
 }

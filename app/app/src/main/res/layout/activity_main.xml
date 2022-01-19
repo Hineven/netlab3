@@ -21,15 +21,38 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical" >
 
                 <com.google.android.exoplayer2.ui.StyledPlayerView
                     android:id="@+id/videoView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="200dp">
+                    android:minHeight="400dp">
 
                 </com.google.android.exoplayer2.ui.StyledPlayerView>
+
+                <Button
+                    android:id="@+id/net"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="onNetworkButtonClicked"
+                    android:text="Connect" />
+
+                <LinearLayout
+                    android:id="@+id/statusList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/logs_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="onLogsButtonClicked"
+                    android:text="Show Logs" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -47,29 +70,15 @@
                         android:text="Uri" />
 
                     <Button
-                        android:id="@+id/settingsButton"
+                        android:id="@+id/play_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.2"
                         android:minWidth="20dip"
-                        android:onClick="onSettingsButtonClicked"
-                        android:text="set" />
+                        android:onClick="onPlayButtonClicked"
+                        android:text="Play" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/statusList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="10dp"></LinearLayout>
-
-                <TextView
-                    android:id="@+id/logsText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:editable="false"
-                    android:padding="10dp"
-                    android:text="TextView" />
             </LinearLayout>
         </ScrollView>
 

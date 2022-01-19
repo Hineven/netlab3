@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.player;
 
 import android.content.Context;
 
