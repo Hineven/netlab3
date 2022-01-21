@@ -7,30 +7,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
-import android.net.ConnectivityManager;
-import android.net.LinkProperties;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.RouteInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.player.net.AcquireTranscodedStream;
-import com.example.player.net.ConnectToMiddlebox;
+import com.example.player.net.AutoConnectToMiddlebox;
+import com.example.player.net.ConnectToMiddleBox;
 import com.example.player.net.NetRes;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -45,15 +38,8 @@ import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.SocketFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -65,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView bitrate_text;
     private TextView playback_delay_text;
     private TextView encoding_text;
-    private Button net_button;
+    private TextView ip_input;
+    private Button auto_connect_button;
+    private Button connect_button;
     private Button play_button;
     private String encoding_name;
     private String decoder_name;
@@ -126,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         res.hardware_accel_codecs = codes.toArray(new String[0]);
     }
     protected void initializeUI () {
-        uri_input = (TextView) ActivityCompat.requireViewById(this, R.id.streamUriText);
+        uri_input = (TextView) ActivityCompat.requireViewById(this, R.id.stream_uri_input);
         bandwidth = new DefaultBandwidthMeter.Builder(getApplicationContext()).build();
         RtmpDataSource.Factory rtmpDataSourceFactory = new RtmpDataSource.Factory();
         rtmpDataSourceFactory.setTransferListener(bandwidth.getTransferListener());
@@ -183,8 +171,10 @@ public class MainActivity extends AppCompatActivity {
 
         status_list.addView(encoding);
 
-        net_button = ActivityCompat.requireViewById(this, R.id.net);
+        auto_connect_button = ActivityCompat.requireViewById(this, R.id.auto_connect_button);
         play_button = ActivityCompat.requireViewById(this, R.id.play_button);
+        connect_button = ActivityCompat.requireViewById(this, R.id.connect_button);
+        ip_input = ActivityCompat.requireViewById(this, R.id.middlebox_ip_input);
     }
 
 
@@ -220,13 +210,18 @@ public class MainActivity extends AppCompatActivity {
             }
             if(data.containsKey("connected")) {
                 if(data.getBoolean("connected")) {
-                    net_button.setEnabled(false);
-                    net_button.setText("Connected");
+                    auto_connect_button.setEnabled(false);
+                    auto_connect_button.setText("Connected");
+                    connect_button.setEnabled(false);
+                    connect_button.setText("Connected");
+                    ip_input.setEnabled(false);
                     net.middlebox_ready = true;
                 } else {
                     net.middlebox_ready = false;
-                    net_button.setEnabled(true);
-                    net_button.setText("Connect");
+                    auto_connect_button.setEnabled(true);
+                    auto_connect_button.setText("Auto Connect");
+                    connect_button.setEnabled(true);
+                    connect_button.setText("Connect");
                     alert("Failed to connect to the middle box.");
                 }
             }
@@ -313,10 +308,10 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new AcquireTranscodedStream(getApplicationContext(), handler, res, net)).start();
     }
     
-    public void onNetworkButtonClicked (View view) {
-        net_button.setEnabled(false);
-        net_button.setText("Connecting");
-        new Thread(new ConnectToMiddlebox(getApplicationContext(), handler, res, net)).start();
+    public void onAutoConnectButtonClicked(View view) {
+        auto_connect_button.setEnabled(false);
+        auto_connect_button.setText("Connecting");
+        new Thread(new AutoConnectToMiddlebox(getApplicationContext(), handler, res, net)).start();
     }
 
     public void onLogsButtonClicked (View view) {
@@ -324,6 +319,12 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("logs", str_log);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+
+    public void onConnectButtonClicked (View view) {
+        String ip = ip_input.getEditableText().toString();
+        res.middlebox_connect_ip = ip;
+        new Thread(new ConnectToMiddleBox(getApplicationContext(), handler, res, net)).start();
     }
 
 }

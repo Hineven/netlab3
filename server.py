@@ -12,7 +12,7 @@ def serve_stream(uri, encodings) -> str:
     # open stream from 'uri'
     # transcode stream to proper code (one of the given 'encodings' list)
     # return the transcoded stream uri
-    return "rtmp://10.42.0.1/live/livestream/1.flv"
+    return "rtmp://192.168.3.28/live/livestream/1.flv"
 
 '''
 停止某个流的转码服务！
@@ -47,7 +47,6 @@ class Server(threading.Thread):
             b = conn.recv(4096)
             uri = b.decode('utf-8')
             print(self.addr, ' calls for service ', uri)
-            transcoded = serve_stream(addr, uri)
             if serving != None:
                 stop_stream(serving)
             serving = serve_stream(uri, self.supported) + '\n'
@@ -60,5 +59,10 @@ def startServer():
         while True:
             conn, addr = server.accept()
             print(addr)
-            threading.Thread()
+            Server(conn, addr)
+if __name__ == "__main__":    
+    with socket.create_server(('', 6978)) as server:
+        while True:
+            conn, addr = server.accept()
+            print(addr)
             Server(conn, addr)

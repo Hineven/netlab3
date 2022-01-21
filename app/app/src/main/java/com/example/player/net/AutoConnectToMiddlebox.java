@@ -23,12 +23,12 @@ import java.nio.charset.StandardCharsets;
 
 import javax.net.SocketFactory;
 
-public class ConnectToMiddlebox implements Runnable {
+public class AutoConnectToMiddlebox implements Runnable {
     Context context;
     Handler handler;
     NetRes net;
     AppRes res;
-    public ConnectToMiddlebox (Context context, Handler handler, AppRes res, NetRes net) {
+    public AutoConnectToMiddlebox(Context context, Handler handler, AppRes res, NetRes net) {
         this.context = context;
         this.handler = handler;
         this.res = res;

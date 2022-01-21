@@ -21,7 +21,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
                 <com.google.android.exoplayer2.ui.StyledPlayerView
                     android:id="@+id/videoView"
@@ -31,12 +31,37 @@
 
                 </com.google.android.exoplayer2.ui.StyledPlayerView>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/middlebox_ip_input"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.6"
+                        android:ems="10"
+                        android:inputType="textPersonName"
+                        android:minHeight="48dp"
+                        android:text="Ip" />
+
+                    <Button
+                        android:id="@+id/connect_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.2"
+                        android:minWidth="20dip"
+                        android:onClick="onConnectButtonClicked"
+                        android:text="connect" />
+                </LinearLayout>
+
                 <Button
-                    android:id="@+id/net"
+                    android:id="@+id/auto_connect_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:onClick="onNetworkButtonClicked"
-                    android:text="Connect" />
+                    android:onClick="onAutoConnectButtonClicked"
+                    android:text="Auto Connect" />
 
                 <LinearLayout
                     android:id="@+id/statusList"
@@ -60,7 +85,7 @@
                     android:orientation="horizontal">
 
                     <EditText
-                        android:id="@+id/streamUriText"
+                        android:id="@+id/stream_uri_input"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.6"
