@@ -1,6 +1,7 @@
 import socket
 import collections
 import threading
+import utils
 
 
 # 实现下面这两个函数！然后调用startServer即可
@@ -9,10 +10,27 @@ import threading
 为用户usr提供服务，将uri流转码为usr可以接受的码率之一，返回转码后的流的地址uri
 '''
 def serve_stream(uri, encodings) -> str:
-    # open stream from 'uri'
-    # transcode stream to proper code (one of the given 'encodings' list)
-    # return the transcoded stream uri
-    return "rtmp://192.168.3.28/live/livestream/1.flv"
+    """
+    open stream from 'uri'
+    transcode stream to proper code (one of the given 'encodings' list)
+    return the transcoded stream uri
+    """
+
+    # start srs and push a default stream
+    if utils.control_srs("status"):
+        utils.start_srs()
+        utils.push_stream("/home/soar/srs/trunk/doc/source.flv", uri)
+    
+    transcoded_uri = uri.strip('\n') + "_ff"
+
+    vcodec = "copy"
+    if "video/hevc" in encodings:
+        vcodec = "libx264"
+    
+    utils.set_config(vcodec=vcodec, vheight="600")
+    utils.control_srs("reload")
+
+    return transcoded_uri
 
 '''
 停止某个流的转码服务！

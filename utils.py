@@ -1,27 +1,39 @@
 import os
+import subprocess
 
-SRS_ROOT = "/home/hineven/packages/srs/trunk/"
+SRS_ROOT = "/home/soar/srs/trunk/"
 SRS_PATH = "objs/srs"
 SRS_CONF = "conf/ffmpeg.transcode.conf"
 SRS_INIT = "etc/init.d/srs"   # check srs status, or reload
 SRS_FFMPEG = "objs/ffmpeg/bin/ffmpeg"
 
 def start_srs():
+    """
+    Start srs at background
+    """
     os.chdir(SRS_ROOT)
-    os.system("{} -c {}".format(SRS_PATH, SRS_CONF))
+    subprocess.run("{} -c {} 1>/dev/null 2>/dev/null &".format(SRS_PATH, SRS_CONF), shell=True)
+    print("srs started")
 
-def reload_srs():
+def control_srs(cmd):
+    """
+    Control srs with etc/init.d/srs
+    e.g. reload, status, grace
+    """
     os.chdir(SRS_ROOT)
-    os.system("{} reload".format(SRS_INIT))
+    ret = os.system("{} {}".format(SRS_INIT, cmd))
+    return ret
 
 def push_stream(filepath, target):
-    """push a video file/stream to the target url.
+    """push a video file/stream to the target url at background.
 
     Args:
         filepath: path to the video.
         target: the url you intend to push.
     """
-    os.system("{} -re -i {} -c copy -f flv {}".format(SRS_FFMPEG, filepath, target))
+    os.chdir(SRS_ROOT)
+    subprocess.run("{} -re -i {} -c copy -f flv {} 1>/dev/null 2>&1 &".format(SRS_FFMPEG, filepath, target), shell=True)
+    print("pushing stream {} to {}".format(filepath, target))
 
 def set_config(**kwargs):
     """rewrite the config file.
@@ -94,11 +106,7 @@ vhost __defaultVhost__ {
     
 
 if __name__ == "__main__":
-    start_srs()
     set_config()
-    reload_srs()
-    push_stream(SRS_ROOT+"doc/source.flv", "rtmp://localhost/live/livestream")
-    os.sleep(10)
-    set_config(vheight="600")
-    reload_srs()
-    
+    start_srs()
+    control_srs("reload")
+    push_stream("/home/soar/srs/trunk/doc/source.flv", "rtmp://localhost/live/livestream")
