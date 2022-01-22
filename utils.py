@@ -1,5 +1,6 @@
 import os
 import subprocess
+import json
 
 SRS_ROOT = "/home/soar/srs/trunk/"
 SRS_PATH = "objs/srs"
@@ -35,6 +36,36 @@ def push_stream(filepath, target):
     subprocess.run("{} -re -i {} -c copy -f flv {} 1>/dev/null 2>&1 &".format(SRS_FFMPEG, filepath, target), shell=True)
     print("pushing stream {} to {}".format(filepath, target))
 
+def get_stream_info(filepath):
+    """Use ffprobe to analyze the stream info and fetch useful ones
+    """
+    os.system("ffprobe -v quiet -print_format json -show_format -show_streams >.stream_info.txt {}".format(filepath))
+    with open(".stream_info.txt", "r") as f:
+        infos = f.read()
+        infos = json.loads(infos)
+    subprocess.Popen("rm .stream_info.txt", shell=True)
+
+    video_stream_infos = None
+    for stream in infos["streams"]:
+        if stream["codec_type"] == "video":
+            video_stream_infos = stream
+            break
+    if video_stream_infos == None:
+        raise RuntimeError
+    format_infos = infos["format"]
+    
+    # for key, value in stream_infos.items():
+    #     print(f"{key} {value}")
+    
+    useful_configs = {
+        "vbitrate": str(int(format_infos["bit_rate"])//100),
+        "vfps": str(int(eval(video_stream_infos["avg_frame_rate"]))),
+        "vwidth": video_stream_infos["width"],
+        "vheight": video_stream_infos["height"],
+    }
+    print(useful_configs)
+    return useful_configs
+
 def set_config(**kwargs):
     """rewrite the config file.
 
@@ -51,7 +82,7 @@ def set_config(**kwargs):
         "vfps":            "25",
         "vwidth":          "768",
         "vheight":         "300",
-        "vthreads":        "12",
+        "vthreads":        "8",
         "vprofile":        "main",
         "vpreset":         "ultrafast",
         "vparams":         [],
@@ -106,7 +137,8 @@ vhost __defaultVhost__ {
     
 
 if __name__ == "__main__":
-    set_config()
-    start_srs()
-    control_srs("reload")
-    push_stream("/home/soar/srs/trunk/doc/source.flv", "rtmp://localhost/live/livestream")
+    # set_config()
+    # start_srs()
+    # control_srs("reload")
+    # push_stream("/home/soar/srs/trunk/doc/source.flv", "rtmp://localhost/live/livestream")
+    get_stream_info("/home/soar/srs/trunk/doc/source.flv")
