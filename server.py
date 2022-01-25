@@ -2,6 +2,7 @@ import socket
 import collections
 import threading
 import utils
+import subprocess
 
 
 # 实现下面这两个函数！然后调用startServer即可
@@ -17,17 +18,24 @@ def serve_stream(uri, encodings) -> str:
     """
 
     # start srs and push a default stream
+    useful_configs = {}
     if utils.control_srs("status"):
         utils.start_srs()
-        utils.push_stream("/home/soar/srs/trunk/doc/source.flv", uri)
+        # default_video = "/home/soar/srs/trunk/doc/source.flv"
+        default_video = "/home/soar/netlab3/1080p.mp4"
+        utils.push_stream(default_video, uri)
+        useful_configs = utils.get_stream_info(default_video)
+        utils.BITRATE_FFMPEG_ORIGINAL = float(useful_configs["vbitrate"])
+        # subprocess.Popen(".python ./utils.py", shell=True)
     
     transcoded_uri = uri.strip('\n') + "_ff"
 
-    vcodec = "copy"
+    # use user-hardware-friendly codec
+    vcodec = "libx264"
     if "video/hevc" in encodings:
         vcodec = "libx264"
     
-    utils.set_config(vcodec=vcodec, vheight="600")
+    utils.set_config(vcodec=vcodec, **useful_configs)
     utils.control_srs("reload")
 
     return transcoded_uri
@@ -70,7 +78,6 @@ class Server(threading.Thread):
             serving = serve_stream(uri, self.supported) + '\n'
             print("reply ", self.addr, " with ", serving)
             conn.send(serving.encode('utf-8'))
-
 
 def startServer():
     with socket.create_server(('', 6978)) as server:
